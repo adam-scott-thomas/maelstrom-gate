@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/adam-scott-thomas/maelstrom-gate/schema/envelope.schema.json",
+  "title": "Maelstrom Gate Authorization Envelope",
+  "description": "A signed, frozen permission set that constrains tool execution. See SPEC.md Section 8.",
+  "type": "object",
+  "required": [
+    "envelope_id",
+    "context_id",
+    "tool_name",
+    "allowed_tools",
+    "max_tool_calls",
+    "max_retries",
+    "budget_seconds",
+    "execution_mode",
+    "dry_run",
+    "branching",
+    "human_approved",
+    "signature"
+  ],
+  "properties": {
+    "envelope_id": {
+      "type": "string",
+      "description": "Unique identifier for this envelope.",
+      "minLength": 1
+    },
+    "context_id": {
+      "type": "string",
+      "description": "Session or context scope.",
+      "minLength": 1
+    },
+    "tool_name": {
+      "type": "string",
+      "description": "Primary tool this envelope authorizes.",
+      "minLength": 1
+    },
+    "allowed_tools": {
+      "type": "array",
+      "description": "All tools permitted under this envelope.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "max_tool_calls": {
+      "type": "integer",
+      "description": "Maximum number of tool invocations allowed.",
+      "minimum": 1
+    },
+    "max_retries": {
+      "type": "integer",
+      "description": "Maximum retry attempts per tool call.",
+      "minimum": 0
+    },
+    "budget_seconds": {
+      "type": "integer",
+      "description": "Time budget for execution in seconds.",
+      "minimum": 1
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": ["standard", "cautious", "minimal"],
+      "description": "Execution mode based on current threat level."
+    },
+    "dry_run": {
+      "type": "boolean",
+      "description": "If true, execute without side effects.",
+      "default": false
+    },
+    "branching": {
+      "type": "string",
+      "enum": ["auto", "deny"],
+      "description": "Whether the executor may spawn sub-tasks."
+    },
+    "human_approved": {
+      "type": "boolean",
+      "description": "Whether a human explicitly approved this invocation.",
+      "default": false
+    },
+    "signature": {
+      "type": "string",
+      "description": "HMAC-SHA256 hex digest over canonical envelope fields.",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

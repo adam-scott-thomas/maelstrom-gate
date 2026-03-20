@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/adam-scott-thomas/maelstrom-gate/schema/filter-result.schema.json",
+  "title": "Maelstrom Gate Filter Result",
+  "description": "The output of a gate filter operation. See SPEC.md Section 7.",
+  "type": "object",
+  "required": ["visible", "suppressed", "mode", "mode_zone", "thresholds"],
+  "properties": {
+    "visible": {
+      "type": "array",
+      "description": "Tools that passed the gate and are available to the agent.",
+      "items": {
+        "$ref": "tool.schema.json"
+      }
+    },
+    "suppressed": {
+      "type": "array",
+      "description": "Tools that were suppressed at the current mode level.",
+      "items": {
+        "$ref": "tool.schema.json"
+      }
+    },
+    "mode": {
+      "type": "number",
+      "description": "The mode signal value used for this filter, clamped to [0.0, 1.0].",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "mode_zone": {
+      "type": "string",
+      "enum": ["normal", "elevated", "crisis"],
+      "description": "The named zone corresponding to the mode value."
+    },
+    "thresholds": {
+      "type": "object",
+      "description": "The suppression thresholds in effect for this filter.",
+      "properties": {
+        "read_only": {
+          "type": ["number", "null"]
+        },
+        "advisory": {
+          "type": ["number", "null"]
+        },
+        "external_action": {
+          "type": ["number", "null"]
+        },
+        "state_mutation": {
+          "type": ["number", "null"]
+        },
+        "high_impact": {
+          "type": ["number", "null"]
+        }
+      },
+      "additionalProperties": {
+        "type": ["number", "null"]
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,8 +1,51 @@
 # maelstrom-gate
 
-Runtime governance gate for AI tool access. Dynamically filter which tools an LLM can see and use based on a threat/mode signal.
+Runtime governance for AI tool access. Filter which tools your agent can see based on a threat signal.
 
-The LLM doesn't refuse. The tool disappears before the LLM can think about it.
+## The Problem
+
+Your AI agent has access to every tool at all times. During an incident, it can still deploy to production, send emails to customers, and delete database records. Telling the model "don't do dangerous things" is a guardrail. Removing the tool from its manifest is a gate.
+
+## The Solution
+
+```python
+from maelstrom_gate import Gate, Tool
+
+gate = Gate()
+gate.add_tools([
+    Tool("read_file", execution_class="read_only"),
+    Tool("deploy",    execution_class="high_impact"),
+])
+
+gate.filter(mode=0.1).visible_names  # ['deploy', 'read_file']  -- calm
+gate.filter(mode=0.5).visible_names  # ['read_file']            -- elevated
+gate.filter(mode=0.8).visible_names  # ['read_file']            -- crisis
+```
+
+The model cannot request a tool it cannot see.
+
+## How It Works
+
+```
+Your signals --> mode (0.0-1.0) --> Gate.filter() --> visible tools --> LLM prompt
+                                                  --> suppressed tools (logged, never shown)
+```
+
+The mode value comes from you. It could be a manual slider, an automated risk score, an incident management system, or a full governance pipeline. The gate does not compute threat -- it enforces the consequences.
+
+## Execution Classes
+
+Every tool gets one execution class. The class determines when the tool disappears.
+
+| Class             | Suppressed When | Use For                        |
+|-------------------|-----------------|--------------------------------|
+| `read_only`       | Never           | File reads, API GETs, queries  |
+| `advisory`        | Never           | Analysis, summaries, scoring   |
+| `external_action` | mode > 0.65     | Emails, webhooks, Slack posts  |
+| `state_mutation`  | mode > 0.65     | DB writes, file writes, config |
+| `high_impact`     | mode > 0.35     | Deploys, deletions, migrations |
+
+Unrecognized classes are treated as `high_impact`.
 
 ## Install
 
@@ -10,103 +53,102 @@ The LLM doesn't refuse. The tool disappears before the LLM can think about it.
 pip install maelstrom-gate
 ```
 
+Python 3.10+. Zero dependencies.
+
 ## Quick Start
 
 ```python
 from maelstrom_gate import Gate, Tool
 
+# Define your tools
 gate = Gate()
 gate.add_tools([
-    Tool("read_file", execution_class="read_only", description="Read a file"),
-    Tool("send_email", execution_class="external_action", description="Send email"),
-    Tool("deploy", execution_class="high_impact", description="Deploy to production"),
+    Tool("read_file",  execution_class="read_only",       description="Read a file"),
+    Tool("analyze",    execution_class="advisory",         description="Analyze data"),
+    Tool("send_email", execution_class="external_action",  description="Send an email"),
+    Tool("write_db",   execution_class="state_mutation",    description="Write to database"),
+    Tool("deploy",     execution_class="high_impact",       description="Deploy to production"),
 ])
 
-# Calm — all tools visible
-result = gate.filter(mode=0.1)
-print(result.visible_names)   # ['deploy', 'read_file', 'send_email']
-
-# Elevated — high_impact suppressed
+# Filter at current threat level
 result = gate.filter(mode=0.5)
-print(result.visible_names)   # ['read_file', 'send_email']
+
+# Feed visible tools to your LLM
+print(result.visible_names)     # ['analyze', 'read_file', 'send_email', 'write_db']
 print(result.suppressed_names)  # ['deploy']
+print(result.mode_status)       # 'elevated'
 
-# Crisis — only safe tools remain
-result = gate.filter(mode=0.8)
-print(result.visible_names)   # ['read_file']
-print(result.suppressed_names)  # ['deploy', 'send_email']
+# Export as a tool catalog for the system prompt
+catalog = result.to_catalog()
 ```
 
-## Execution Classes
+## Framework Examples
 
-| Class | Suppressed Above | Examples |
-|-------|-----------------|----------|
-| `read_only` | Never | File reads, API GETs |
-| `advisory` | Never | Analysis, summaries |
-| `external_action` | 0.65 | Emails, webhooks |
-| `state_mutation` | 0.65 | File writes, DB updates |
-| `high_impact` | 0.35 | Deployments, deletions |
+Working examples for common agent frameworks:
 
-## Custom Thresholds
-
-```python
-gate = Gate(thresholds={"high_impact": 0.20})  # suppress deploy earlier
-```
+- [`examples/basic_usage.py`](examples/basic_usage.py) -- standalone gate usage
+- [`examples/openai_functions.py`](examples/openai_functions.py) -- filter OpenAI function-calling tools
+- [`examples/langchain_tools.py`](examples/langchain_tools.py) -- wrap LangChain tools with gate filtering
+- [`examples/fastapi_middleware.py`](examples/fastapi_middleware.py) -- per-request tool filtering via middleware
 
 ## Authorization Envelopes
 
-Signed permission sets that tell the executor exactly what it's allowed to do:
+Signed permission sets that constrain tool execution. The envelope travels with the tool call and tells the executor what it is allowed to do.
 
 ```python
-from maelstrom_gate import build_envelope, verify_envelope
+from maelstrom_gate import build_envelope, verify_envelope, Tool
 
 tool = Tool("read_file", execution_class="read_only")
 envelope = build_envelope(tool, mode=0.5, context_id="session_1", signing_key="your-key")
 
-print(envelope.budget_seconds)   # 15 (halved under elevated mode)
-print(envelope.execution_mode)   # "cautious"
+envelope.budget_seconds   # 15  (reduced under elevated mode)
+envelope.execution_mode   # "cautious"
+envelope.max_tool_calls   # 10
 
-assert verify_envelope(envelope, "your-key")
+verify_envelope(envelope, "your-key")   # True
+verify_envelope(envelope, "wrong-key")  # False
 ```
+
+Envelope parameters tighten automatically as mode increases. See [SPEC.md](SPEC.md) Section 8 for the full adjustment table.
 
 ## Ingress Validation
 
-Validate tool requests from the LLM — never trust the model:
+Validate tool requests from the model before execution. Never trust the model's tool choice -- verify it against the gate.
 
 ```python
 from maelstrom_gate import validate_proposal
 
 result = validate_proposal("deploy", gate, mode=0.5)
-print(result.accepted)  # False
-print(result.reason)    # "execution_class_suppressed"
+result.accepted  # False
+result.reason    # "execution_class_suppressed"
 ```
 
-## Catalog Export
+## Custom Thresholds
 
-Generate a tool catalog for your LLM prompt:
+Override default suppression thresholds per execution class:
 
 ```python
-result = gate.filter(mode=0.5)
-catalog = result.to_catalog()
-# Feed this to your LLM system prompt — suppressed tools are absent.
+gate = Gate(thresholds={"high_impact": 0.20})  # suppress deploys earlier
+gate.add_tool(Tool("deploy", execution_class="high_impact"))
+
+gate.filter(mode=0.25).suppressed_names  # ['deploy']
 ```
 
-## How It Works
+## The Spec
 
-```
-Your signals → mode value → Gate.filter() → filtered tool list → LLM prompt
-                                          → suppressed tools (logged, not shown)
-```
+[SPEC.md](SPEC.md) defines the Maelstrom Gate standard in language-agnostic terms. It covers execution classes, suppression rules, thresholds, envelope schemas, and ingress validation. You can implement it in any language without reading the Python.
 
-The mode value comes from you. It could be a manual slider, an automated risk assessment, or a governance pipeline.
+## JSON Schemas
 
-## Zero Dependencies
+Formal JSON Schema definitions for interoperability:
 
-Python 3.10+. Standard library only. Works with any agent framework.
+- [`schema/tool.schema.json`](schema/tool.schema.json) -- tool manifest
+- [`schema/envelope.schema.json`](schema/envelope.schema.json) -- authorization envelope
+- [`schema/filter-result.schema.json`](schema/filter-result.schema.json) -- filter result
 
-## From the Maelstrom Project
+## From Maelstrom
 
-Extracted from [Maelstrom](https://github.com/adam-scott-thomas/maelstrom) — a governed autonomy runtime. The gate filters tools; Maelstrom computes the mode value through a 22-node deterministic pipeline with crisis classification, regret analysis, and personality calibration.
+Extracted from [Maelstrom](https://github.com/adam-scott-thomas/maelstrom), a deterministic cognitive architecture for governed AI autonomy. Maelstrom computes the mode signal through a 22-node pipeline with crisis classification, regret analysis, and personality calibration. The gate is the enforcement layer -- it works standalone or as part of the full runtime.
 
 ## License
 

@@ -1,7 +1,7 @@
-"""Maelstrom Gate — runtime governance for AI tool access.
+"""Maelstrom Gate -- runtime governance for AI tool access.
 
-Dynamically filter which tools an LLM can see and use based on
-a threat/mode signal.
+Implements the Maelstrom Gate standard (see SPEC.md) for dynamically filtering
+which tools an AI agent can see and invoke based on a threat/mode signal.
 
     from maelstrom_gate import Gate, Tool
 
@@ -11,7 +11,10 @@ a threat/mode signal.
     gate.add_tool(Tool("deploy", execution_class="high_impact"))
 
     visible = gate.filter(mode=0.8)
-    # → only read_file visible — send_email and deploy suppressed
+    # -> only read_file visible -- send_email and deploy suppressed
+
+Specification: SPEC.md
+JSON Schemas: schema/tool.schema.json, schema/envelope.schema.json
 """
 
 __version__ = "0.1.0"

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/adam-scott-thomas/maelstrom-gate/schema/tool.schema.json",
+  "title": "Maelstrom Gate Tool Manifest",
+  "description": "Describes a tool registered with the Maelstrom Gate. See SPEC.md Section 6.",
+  "type": "object",
+  "required": ["name", "execution_class"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique tool identifier.",
+      "minLength": 1
+    },
+    "execution_class": {
+      "type": "string",
+      "enum": ["read_only", "advisory", "external_action", "state_mutation", "high_impact"],
+      "description": "Classification of the tool's side-effect severity."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what the tool does.",
+      "default": ""
+    },
+    "inputs": {
+      "type": "object",
+      "description": "Map of parameter names to type descriptions.",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {}
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Arbitrary metadata attached to the tool.",
+      "additionalProperties": true,
+      "default": {}
+    }
+  },
+  "additionalProperties": false
+}

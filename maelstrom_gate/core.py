@@ -1,4 +1,11 @@
-"""Core gate logic — tool classification, suppression, and filtering.
+"""Core gate logic -- tool classification, suppression, and filtering.
+
+Implements SPEC.md Sections 2-5 and 7:
+- Five execution classes (Section 2)
+- Suppression rule: mode > threshold (Section 3)
+- Default thresholds (Section 4)
+- Mode zones: normal, elevated, crisis (Section 5)
+- Filter result structure (Section 7)
 
 Zero dependencies. Works with any agent framework.
 """
@@ -8,11 +15,16 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
+# Zone boundaries (SPEC.md Section 5)
 T_DOWN = 0.35
 T_UP = 0.65
 
 
 class ExecutionClass(str, Enum):
+    """Tool execution class -- classifies side-effect severity.
+
+    See SPEC.md Section 2 for descriptions.
+    """
     READ_ONLY = "read_only"
     ADVISORY = "advisory"
     EXTERNAL_ACTION = "external_action"
@@ -20,6 +32,8 @@ class ExecutionClass(str, Enum):
     HIGH_IMPACT = "high_impact"
 
 
+# Default suppression thresholds (SPEC.md Section 4).
+# None means the class is never suppressed.
 SUPPRESSION_THRESHOLDS: dict[ExecutionClass, float | None] = {
     ExecutionClass.READ_ONLY: None,
     ExecutionClass.ADVISORY: None,
@@ -31,6 +45,12 @@ SUPPRESSION_THRESHOLDS: dict[ExecutionClass, float | None] = {
 
 @dataclass(frozen=True)
 class Tool:
+    """A tool registered with the gate.
+
+    Conforms to schema/tool.schema.json. The ``execution_class`` field
+    determines when this tool is suppressed. Unrecognized classes are
+    treated as ``high_impact`` per SPEC.md Section 2.
+    """
     name: str
     execution_class: str = "read_only"
     description: str = ""
@@ -47,6 +67,12 @@ class Tool:
 
 @dataclass(frozen=True)
 class ToolFilter:
+    """Result of a gate filter operation.
+
+    Conforms to schema/filter-result.schema.json (SPEC.md Section 7).
+    Contains the visible tools, suppressed tools, mode value, zone name,
+    and the thresholds that were applied.
+    """
     visible: tuple[Tool, ...]
     suppressed: tuple[Tool, ...]
     mode: float
@@ -55,13 +81,16 @@ class ToolFilter:
 
     @property
     def visible_names(self) -> list[str]:
+        """Names of tools that passed the gate."""
         return [t.name for t in self.visible]
 
     @property
     def suppressed_names(self) -> list[str]:
+        """Names of tools that were suppressed."""
         return [t.name for t in self.suppressed]
 
     def to_catalog(self) -> list[dict[str, Any]]:
+        """Export visible tools as dicts suitable for an LLM system prompt."""
         return [
             {"name": t.name, "execution_class": t.execution_class,
              "description": t.description, "inputs": t.inputs}
@@ -70,6 +99,12 @@ class ToolFilter:
 
 
 def is_suppressed(execution_class: str, mode: float) -> bool:
+    """Check whether a tool with the given class is suppressed at the given mode.
+
+    Implements the suppression rule from SPEC.md Section 3:
+    a tool is suppressed when mode > threshold for its execution class.
+    Unrecognized classes are treated as high_impact.
+    """
     try:
         ec = ExecutionClass(execution_class)
     except ValueError:
@@ -81,7 +116,23 @@ def is_suppressed(execution_class: str, mode: float) -> bool:
 
 
 class Gate:
+    """The runtime governance gate.
+
+    Register tools, then call ``filter(mode)`` to get the tools visible at
+    the current threat level. Suppressed tools are removed from the result
+    before the manifest reaches the language model.
+
+    Implements SPEC.md Sections 3-5 and 10 (conformance).
+    """
+
     def __init__(self, thresholds: dict[str, float | None] | None = None) -> None:
+        """Initialize the gate with optional custom thresholds.
+
+        Args:
+            thresholds: Override default suppression thresholds. Keys are
+                execution class names, values are threshold floats or None
+                (never suppress). Unrecognized keys are ignored.
+        """
         self._tools: dict[str, Tool] = {}
         self._thresholds: dict[ExecutionClass, float | None] = dict(SUPPRESSION_THRESHOLDS)
         if thresholds:
@@ -92,16 +143,26 @@ class Gate:
                     pass
 
     def add_tool(self, tool: Tool) -> None:
+        """Register a single tool with the gate."""
         self._tools[tool.name] = tool
 
     def add_tools(self, tools: list[Tool]) -> None:
+        """Register multiple tools with the gate."""
         for t in tools:
             self._tools[t.name] = t
 
     def remove_tool(self, name: str) -> None:
+        """Remove a tool from the gate by name. No-op if not found."""
         self._tools.pop(name, None)
 
     def filter(self, mode: float) -> ToolFilter:
+        """Filter registered tools at the given mode level.
+
+        Returns a ``ToolFilter`` containing visible tools, suppressed tools,
+        the clamped mode value, the mode zone name, and effective thresholds.
+
+        The mode value is clamped to [0.0, 1.0] per SPEC.md Section 10.
+        """
         mode = max(0.0, min(1.0, mode))
         visible, suppressed = [], []
         for tool in sorted(self._tools.values(), key=lambda t: t.name):
@@ -125,4 +186,5 @@ class Gate:
 
     @property
     def tools(self) -> list[Tool]:
+        """All registered tools, sorted by name."""
         return sorted(self._tools.values(), key=lambda t: t.name)
