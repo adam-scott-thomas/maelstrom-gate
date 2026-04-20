@@ -239,7 +239,7 @@ def test_verify_fresh_expired():
     }
     import hashlib, hmac as _hmac
     from maelstrom_gate.envelope import _canonical_hash
-    sig = _hmac.new(KEY.encode(), _canonical_hash(old_data).encode(), hashlib.sha256).hexdigest()
+    sig = _hmac.new(KEY.encode(), _canonical_hash(old_data), hashlib.sha256).hexdigest()
     old_env = AuthorizationEnvelope(
         envelope_id=e.envelope_id, context_id=e.context_id,
         tool_name=e.tool_name, allowed_tools=e.allowed_tools,

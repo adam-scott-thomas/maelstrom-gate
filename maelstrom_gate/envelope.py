@@ -44,13 +44,15 @@ class AuthorizationEnvelope:
     signature: str = ""
 
 
-def _canonical_hash(data: Any) -> str:
+def _canonical_hash(data: Any) -> bytes:
     """Compute SHA-256 of canonical JSON (sorted keys, no whitespace).
 
-    This is step 2-3 of the signature algorithm in SPEC.md Section 8.
+    Returns the raw 32-byte digest (not hex) so HMAC operates on the same
+    bytes across Python and Go implementations. This is step 2-3 of the
+    signature algorithm in SPEC.md Section 8.
     """
     raw = json.dumps(data, sort_keys=True, separators=(",", ":"), allow_nan=False)
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    return hashlib.sha256(raw.encode("utf-8")).digest()
 
 
 def build_envelope(
@@ -93,7 +95,7 @@ def build_envelope(
         "branching": branching, "human_approved": human_approved,
         "created_at": created_at,
     }
-    sig = hmac.new(signing_key.encode(), _canonical_hash(sign_data).encode(), hashlib.sha256).hexdigest()
+    sig = hmac.new(signing_key.encode(), _canonical_hash(sign_data), hashlib.sha256).hexdigest()
     return AuthorizationEnvelope(
         envelope_id=envelope_id, context_id=context_id, tool_name=tool.name,
         allowed_tools=allowed, max_tool_calls=max_tool_calls, max_retries=1,
@@ -124,7 +126,7 @@ def verify_envelope(envelope: AuthorizationEnvelope, signing_key: str) -> bool:
         "human_approved": envelope.human_approved,
         "created_at": envelope.created_at,
     }
-    expected = hmac.new(signing_key.encode(), _canonical_hash(sign_data).encode(), hashlib.sha256).hexdigest()
+    expected = hmac.new(signing_key.encode(), _canonical_hash(sign_data), hashlib.sha256).hexdigest()
     return hmac.compare_digest(envelope.signature, expected)
 
 
