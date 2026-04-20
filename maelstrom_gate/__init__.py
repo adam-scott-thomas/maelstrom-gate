@@ -19,7 +19,16 @@ JSON Schemas: schema/tool.schema.json, schema/envelope.schema.json
 
 __version__ = "0.1.0"
 
-from maelstrom_gate.core import Gate, Tool, ToolFilter, ExecutionClass
+from maelstrom_gate.core import (
+    Gate,
+    Tool,
+    ToolFilter,
+    ExecutionClass,
+    SUPPRESSION_THRESHOLDS,
+    T_DOWN,
+    T_UP,
+    zone,
+)
 from maelstrom_gate.envelope import AuthorizationEnvelope, build_envelope, verify_envelope, verify_envelope_fresh
 from maelstrom_gate.ingress import validate_proposal, IngressResult
 
@@ -28,6 +37,10 @@ __all__ = [
     "Tool",
     "ToolFilter",
     "ExecutionClass",
+    "SUPPRESSION_THRESHOLDS",
+    "T_DOWN",
+    "T_UP",
+    "zone",
     "AuthorizationEnvelope",
     "build_envelope",
     "verify_envelope",

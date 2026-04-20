@@ -43,6 +43,24 @@ SUPPRESSION_THRESHOLDS: dict[ExecutionClass, float | None] = {
 }
 
 
+def zone(mode: float) -> str:
+    """Return the mode zone name for a given mode signal (SPEC.md Section 5).
+
+    Zones:
+    - "normal"   when mode <= T_DOWN (0.35)
+    - "elevated" when T_DOWN < mode <= T_UP (0.65)
+    - "crisis"   when mode > T_UP
+
+    Input is clamped to [0.0, 1.0].
+    """
+    m = max(0.0, min(1.0, mode))
+    if m > T_UP:
+        return "crisis"
+    if m > T_DOWN:
+        return "elevated"
+    return "normal"
+
+
 @dataclass(frozen=True)
 class Tool:
     """A tool registered with the gate.
@@ -193,12 +211,7 @@ class Gate:
                 suppressed.append(tool)
             else:
                 visible.append(tool)
-        if mode > T_UP:
-            status = "crisis"
-        elif mode > T_DOWN:
-            status = "elevated"
-        else:
-            status = "normal"
+        status = zone(mode)
         return ToolFilter(
             visible=tuple(visible), suppressed=tuple(suppressed),
             mode=mode, mode_zone=status,
