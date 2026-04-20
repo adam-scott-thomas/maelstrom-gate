@@ -76,7 +76,7 @@ result = gate.filter(mode=0.5)
 # Feed visible tools to your LLM
 print(result.visible_names)     # ['analyze', 'read_file', 'send_email', 'write_db']
 print(result.suppressed_names)  # ['deploy']
-print(result.mode_status)       # 'elevated'
+print(result.mode_zone)         # 'elevated'
 
 # Export as a tool catalog for the system prompt
 catalog = result.to_catalog()

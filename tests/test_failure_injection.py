@@ -26,7 +26,7 @@ def test_filter_no_tools():
     assert r.visible == ()
     assert r.suppressed == ()
     assert r.mode == 0.5
-    assert r.mode_status == "elevated"
+    assert r.mode_zone == "elevated"
 
 
 def test_tools_property_empty():
@@ -95,7 +95,7 @@ def test_mode_exactly_zero():
     g = Gate()
     g.add_tool(Tool("x", execution_class="high_impact"))
     r = g.filter(0.0)
-    assert r.mode_status == "normal"
+    assert r.mode_zone == "normal"
     assert "x" in r.visible_names
 
 
@@ -104,7 +104,7 @@ def test_mode_exactly_one():
     g.add_tool(Tool("r", execution_class="read_only"))
     g.add_tool(Tool("d", execution_class="high_impact"))
     r = g.filter(1.0)
-    assert r.mode_status == "crisis"
+    assert r.mode_zone == "crisis"
     assert "r" in r.visible_names
     assert "d" in r.suppressed_names
 
@@ -115,15 +115,15 @@ def test_mode_exactly_one():
 def test_zone_boundary_t_down():
     g = Gate()
     g.add_tool(Tool("x", execution_class="read_only"))
-    assert g.filter(T_DOWN).mode_status == "normal"
-    assert g.filter(T_DOWN + 0.001).mode_status == "elevated"
+    assert g.filter(T_DOWN).mode_zone == "normal"
+    assert g.filter(T_DOWN + 0.001).mode_zone == "elevated"
 
 
 def test_zone_boundary_t_up():
     g = Gate()
     g.add_tool(Tool("x", execution_class="read_only"))
-    assert g.filter(T_UP).mode_status == "elevated"
-    assert g.filter(T_UP + 0.001).mode_status == "crisis"
+    assert g.filter(T_UP).mode_zone == "elevated"
+    assert g.filter(T_UP + 0.001).mode_zone == "crisis"
 
 
 def test_suppression_boundary_high_impact():

@@ -76,7 +76,7 @@ class ToolFilter:
     visible: tuple[Tool, ...]
     suppressed: tuple[Tool, ...]
     mode: float
-    mode_status: str
+    mode_zone: str
     thresholds: dict[str, float | None] = field(default_factory=dict)
 
     @property
@@ -201,7 +201,7 @@ class Gate:
             status = "normal"
         return ToolFilter(
             visible=tuple(visible), suppressed=tuple(suppressed),
-            mode=mode, mode_status=status,
+            mode=mode, mode_zone=status,
             thresholds={ec.value: th for ec, th in self._thresholds.items()},
         )
 

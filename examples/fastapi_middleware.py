@@ -41,7 +41,7 @@ def gate_middleware(request_headers: dict, handler):
     # Inject into request state -- your endpoint reads from here
     state = {
         "tools": result.to_catalog(),
-        "mode_zone": result.mode_status,
+        "mode_zone": result.mode_zone,
         "suppressed": result.suppressed_names,
     }
     return handler(state)
