@@ -138,6 +138,8 @@ gate.filter(mode=0.25).suppressed_names  # ['deploy']
 
 [SPEC.md](SPEC.md) defines the Maelstrom Gate standard in language-agnostic terms. It covers execution classes, suppression rules, thresholds, envelope schemas, and ingress validation. You can implement it in any language without reading the Python.
 
+[ARCHITECTURE.md](ARCHITECTURE.md) documents the 18-package product suite, the canonical envelope serialization rules, and the bugs we caught while making Python and Go agree on byte-identical signatures. Read it before writing a new implementation.
+
 ## JSON Schemas
 
 Formal JSON Schema definitions for interoperability:
@@ -146,10 +148,37 @@ Formal JSON Schema definitions for interoperability:
 - [`schema/envelope.schema.json`](schema/envelope.schema.json) -- authorization envelope
 - [`schema/filter-result.schema.json`](schema/filter-result.schema.json) -- filter result
 
+## Implementations
+
+`maelstrom-gate` is the Python reference implementation. The spec is language-agnostic and other implementations exist:
+
+| Implementation | Language | Repo | Status |
+|----------------|----------|------|--------|
+| `maelstrom-gate` | Python 3.10+ | this repo | **reference** |
+| `gate-server-go` | Go 1.22+ | `adam-scott-thomas/gate-server-go` | conformant — passes cross-language vectors; Python-built envelopes verify in Go |
+
+Cross-language conformance is enforced via shared test vectors (`gate-test/vectors/envelope_signing.json`). Any new implementation is compliant iff it passes those vectors and can verify an envelope built by this reference. See [ARCHITECTURE.md §6](ARCHITECTURE.md#6-conformance-requirements-for-new-implementations).
+
+## The Suite
+
+`maelstrom-gate` is one package in an 18-package product suite:
+
+```
+Layer 0 — Spec                maelstrom-gate, gate-server-go
+Layer 1 — Dev interfaces      gate-sdk, gate-cli
+Layer 2 — Domain              gate-policy, gate-schema
+Layer 3 — Governance          gate-guard, gate-webhook, gate-compliance, gate-metrics
+Layer 4 — Operations          gate-server, gate-dashboard, gate-dash, gatectl
+Layer 5 — Agents              gate-agent, gate-pilot, gate-examples
+Layer 6 — QA                  gate-test, gate-bench
+```
+
+Each layer imports only from the layer(s) below it. Every package (except the stdlib-only variants gate-dash, gatectl) lives as a sibling repo under `adam-scott-thomas/gate-*`. See [ARCHITECTURE.md §2](ARCHITECTURE.md#2-the-18-package-suite).
+
 ## From Maelstrom
 
 Extracted from [Maelstrom](https://github.com/adam-scott-thomas/maelstrom), a deterministic cognitive architecture for governed AI autonomy. Maelstrom computes the mode signal through a 22-node pipeline with crisis classification, regret analysis, and personality calibration. The gate is the enforcement layer -- it works standalone or as part of the full runtime.
 
 ## License
 
-MIT
+Apache 2.0 — see [LICENSE](LICENSE).
