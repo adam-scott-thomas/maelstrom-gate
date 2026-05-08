@@ -1,6 +1,6 @@
 ---
-title: "maelstrom-gate Audit"
-scope: maelstrom-gate/
+title: "gate-keeper Audit"
+scope: gate-keeper/
 type: project
 owner: Adam Thomas
 lifecycle_state: active_dev

@@ -1,17 +1,17 @@
-# Maelstrom Gate — Architecture
+# Gatekeeper — Architecture
 
-> This document describes the full Maelstrom Gate product suite: what it is,
+> This document describes the full Gatekeeper product suite: what it is,
 > how the 18 packages fit together, and the canonical rules implementations
 > must obey to remain interoperable.
 >
-> Reference implementation: `maelstrom-gate` (Python).
+> Reference implementation: `gate-keeper` (Python).
 > Alternate implementation: `gate-server-go` (Go).
 
 ---
 
-## 1. What Maelstrom Gate is
+## 1. What Gatekeeper is
 
-Maelstrom Gate is a **runtime governance standard for AI tool access**.
+Gatekeeper is a **runtime governance standard for AI tool access**.
 
 Instead of telling a language model *"please don't do dangerous things"* (a
 guardrail the model can ignore), Gate **removes the tool from its manifest**
@@ -55,7 +55,7 @@ Mode maps to three named zones: `normal` (≤ 0.35), `elevated` (≤ 0.65),
 
 ## 2. The 18-package suite
 
-Maelstrom Gate is not a single library. It's a standards-style product suite
+Gatekeeper is not a single library. It's a standards-style product suite
 with clean separation between the **spec**, the **implementations**, and
 everything else that consumes or operates on them.
 
@@ -63,7 +63,7 @@ everything else that consumes or operates on them.
                     ┌────────────────────────────────────────────────┐
                     │            LAYER 0 — SPECIFICATION             │
                     │                                                │
-                    │   maelstrom-gate   (Python reference impl +    │
+                    │   gate-keeper   (Python reference impl +    │
                     │                     SPEC.md + JSON schemas)    │
                     │   gate-server-go   (Go reimplementation)       │
                     │                                                │
@@ -107,7 +107,7 @@ OUTLIER (different product, shares "gate" prefix only):
 
 | Layer | Package | Role | Lang | LOC |
 |-------|---------|------|------|-----|
-| 0 | `maelstrom-gate` | Core spec + Python reference impl | Python | 1,639 |
+| 0 | `gate-keeper` | Core spec + Python reference impl | Python | 1,639 |
 | 0 | `gate-server-go` | Go reimplementation (polyglot) | Go | 1,366 |
 | 1 | `gate-sdk` | Framework adapters (OpenAI, Anthropic, webhook) | Python | 1,936 |
 | 1 | `gate-cli` | Operator's CLI (click-based) | Python | 1,741 |
@@ -321,7 +321,7 @@ its signature:
 ```
   ┌────────────────────┐                    ┌────────────────────┐
   │      PYTHON        │                    │         GO         │
-  │  maelstrom-gate    │                    │  gate-server-go    │
+  │  gate-keeper    │                    │  gate-server-go    │
   │                    │                    │                    │
   │  Tool("deploy",    │                    │                    │
   │   high_impact)     │                    │                    │
@@ -370,7 +370,7 @@ only if **all** of the following hold:
 5. Passes `gate-test/vectors/envelope_signing.json` with byte-identical
    canonical JSON and signatures.
 
-6. Can verify an envelope built by `maelstrom-gate` (Python reference) and
+6. Can verify an envelope built by `gate-keeper` (Python reference) and
    vice versa.
 
 7. When outputs are shared as JSON over the wire, uses a **typed decoder**
@@ -382,7 +382,7 @@ only if **all** of the following hold:
 ## 7. Stability & versioning
 
 - **Specification version** is tracked in `SPEC.md`.
-- **Reference implementation version** is in `maelstrom-gate/pyproject.toml`.
+- **Reference implementation version** is in `gate-keeper/pyproject.toml`.
 - Both are currently **0.1.0**. Spec changes require a minor version bump on
   both.
 - Breaking changes to canonical serialization (payload field list, algorithm

@@ -13,8 +13,8 @@ Tests for:
 """
 import threading
 import pytest
-from maelstrom_gate import Gate, Tool, ToolFilter, ExecutionClass
-from maelstrom_gate.core import is_suppressed, T_DOWN, T_UP, SUPPRESSION_THRESHOLDS
+from gatekeeper import Gate, Tool, ToolFilter, ExecutionClass
+from gatekeeper.core import is_suppressed, T_DOWN, T_UP, SUPPRESSION_THRESHOLDS
 
 
 # --- Empty gate ---
@@ -241,7 +241,7 @@ def test_to_openai_tools_no_description():
 
 # --- Envelope edge cases ---
 
-from maelstrom_gate.envelope import build_envelope, verify_envelope, AuthorizationEnvelope
+from gatekeeper.envelope import build_envelope, verify_envelope, AuthorizationEnvelope
 
 
 def test_envelope_empty_signing_key():
@@ -332,7 +332,7 @@ def test_envelope_crisis_tightens_branching():
 
 # --- Ingress edge cases ---
 
-from maelstrom_gate.ingress import validate_proposal, IngressResult
+from gatekeeper.ingress import validate_proposal, IngressResult
 
 
 def test_ingress_empty_tool_name():

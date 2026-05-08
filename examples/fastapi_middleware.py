@@ -4,7 +4,7 @@
 # The upstream system (your risk engine, manual toggle, etc.) sets the
 # X-Threat-Level header. The middleware gates which tools the LLM can see.
 
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 # --- Simulated FastAPI types (replace with real imports) ---
 # from fastapi import FastAPI, Request, Response

@@ -2,7 +2,7 @@
 #
 # Basic usage: register tools, filter by mode, inspect results.
 
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 # Register tools with execution classes
 gate = Gate()

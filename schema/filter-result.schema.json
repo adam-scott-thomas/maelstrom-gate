@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/adam-scott-thomas/maelstrom-gate/schema/filter-result.schema.json",
+  "$id": "https://github.com/adam-scott-thomas/gate-keeper/schema/filter-result.schema.json",
   "title": "Maelstrom Gate Filter Result",
   "description": "The output of a gate filter operation. See SPEC.md Section 7.",
   "type": "object",

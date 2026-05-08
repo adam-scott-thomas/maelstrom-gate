@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from maelstrom_gate.core import Gate, is_suppressed
+from gatekeeper.core import Gate, is_suppressed
 
 
 @dataclass(frozen=True)

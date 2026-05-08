@@ -20,7 +20,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Any
 
-from maelstrom_gate.core import Tool
+from gatekeeper.core import Tool
 
 
 @dataclass(frozen=True)

@@ -1,4 +1,4 @@
-# maelstrom-gate
+# gate-keeper
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Русский](README.ru.md) · **Deutsch**
 
@@ -11,7 +11,7 @@ Dein AI-Agent hat jederzeit Zugriff auf jedes Tool. Auch mitten in einem Inciden
 ## Die Lösung
 
 ```python
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 gate = Gate()
 gate.add_tools([
@@ -52,7 +52,7 @@ Unbekannte Classes werden wie `high_impact` behandelt.
 ## Installation
 
 ```bash
-pip install maelstrom-gate
+pip install gate-keeper
 ```
 
 Python 3.10+. Keine Abhängigkeiten.
@@ -60,7 +60,7 @@ Python 3.10+. Keine Abhängigkeiten.
 ## Quick Start
 
 ```python
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 # Define your tools
 gate = Gate()
@@ -98,7 +98,7 @@ Lauffähige Beispiele für gängige Agent-Frameworks:
 Signierte Berechtigungs-Sets, die die Tool-Ausführung einschränken. Das Envelope reist mit dem Tool-Call mit und sagt dem Executor, was er tun darf.
 
 ```python
-from maelstrom_gate import build_envelope, verify_envelope, Tool
+from gatekeeper import build_envelope, verify_envelope, Tool
 
 tool = Tool("read_file", execution_class="read_only")
 envelope = build_envelope(tool, mode=0.5, context_id="session_1", signing_key="your-key")
@@ -118,7 +118,7 @@ Die Envelope-Parameter ziehen sich automatisch enger, wenn mode steigt. Die voll
 Validiere Tool-Requests vom Modell, bevor sie ausgeführt werden. Vertraue der Tool-Wahl des Modells nie — prüfe sie gegen das Gate.
 
 ```python
-from maelstrom_gate import validate_proposal
+from gatekeeper import validate_proposal
 
 result = validate_proposal("deploy", gate, mode=0.5)
 result.accepted  # False
@@ -152,21 +152,21 @@ Formale JSON-Schema-Definitionen für Interoperabilität:
 
 ## Implementierungen
 
-`maelstrom-gate` ist die Python-Referenzimplementierung. Die Spec ist sprachunabhängig, und weitere Implementierungen existieren bereits:
+`gate-keeper` ist die Python-Referenzimplementierung. Die Spec ist sprachunabhängig, und weitere Implementierungen existieren bereits:
 
 | Implementierung   | Sprache      | Repository | Status |
 |-------------------|--------------|------|------|
-| `maelstrom-gate`  | Python 3.10+ | dieses Repo | **Referenz** |
+| `gate-keeper`  | Python 3.10+ | dieses Repo | **Referenz** |
 | `gate-server-go`  | Go 1.22+     | `adam-scott-thomas/gate-server-go` | konform — besteht die sprachübergreifenden Vectors; von Python erzeugte Envelopes werden in Go verifiziert |
 
 Cross-Language-Konformität wird über gemeinsame Test-Vectors (`gate-test/vectors/envelope_signing.json`) erzwungen. Eine neue Implementierung gilt genau dann als konform, wenn sie diese Vectors besteht und ein von dieser Referenz gebautes Envelope verifizieren kann. Siehe [ARCHITECTURE.md §6](ARCHITECTURE.md#6-conformance-requirements-for-new-implementations).
 
 ## Die Suite
 
-`maelstrom-gate` ist eines von 18 Paketen der Produkt-Suite:
+`gate-keeper` ist eines von 18 Paketen der Produkt-Suite:
 
 ```
-Layer 0 — Spec                maelstrom-gate, gate-server-go
+Layer 0 — Spec                gate-keeper, gate-server-go
 Layer 1 — Dev interfaces      gate-sdk, gate-cli
 Layer 2 — Domain              gate-policy, gate-schema
 Layer 3 — Governance          gate-guard, gate-webhook, gate-compliance, gate-metrics

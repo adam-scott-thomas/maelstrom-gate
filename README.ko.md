@@ -1,4 +1,4 @@
-# maelstrom-gate
+# gate-keeper
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · **한국어** · [Русский](README.ru.md) · [Deutsch](README.de.md)
 
@@ -11,7 +11,7 @@ AI 도구 접근에 대한 런타임 거버넌스. 위협 시그널을 기반으
 ## 해결책
 
 ```python
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 gate = Gate()
 gate.add_tools([
@@ -52,7 +52,7 @@ Your signals --> mode (0.0-1.0) --> Gate.filter() --> visible tools --> LLM prom
 ## 설치
 
 ```bash
-pip install maelstrom-gate
+pip install gate-keeper
 ```
 
 Python 3.10+. 의존성 없음.
@@ -60,7 +60,7 @@ Python 3.10+. 의존성 없음.
 ## 빠른 시작
 
 ```python
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 # Define your tools
 gate = Gate()
@@ -98,7 +98,7 @@ catalog = result.to_catalog()
 도구 실행을 제약하는 서명된 권한 집합입니다. 봉투는 도구 호출과 함께 전달되며, 실행자에게 무엇이 허용되는지 알려 줍니다.
 
 ```python
-from maelstrom_gate import build_envelope, verify_envelope, Tool
+from gatekeeper import build_envelope, verify_envelope, Tool
 
 tool = Tool("read_file", execution_class="read_only")
 envelope = build_envelope(tool, mode=0.5, context_id="session_1", signing_key="your-key")
@@ -118,7 +118,7 @@ verify_envelope(envelope, "wrong-key")  # False
 모델로부터 오는 도구 요청을 실행 전에 검증합니다. 모델의 도구 선택을 절대 신뢰하지 말고 —— Gate에 대조하여 확인하십시오.
 
 ```python
-from maelstrom_gate import validate_proposal
+from gatekeeper import validate_proposal
 
 result = validate_proposal("deploy", gate, mode=0.5)
 result.accepted  # False
@@ -138,7 +138,7 @@ gate.filter(mode=0.25).suppressed_names  # ['deploy']
 
 ## 명세
 
-[SPEC.md](SPEC.md)는 Maelstrom Gate 표준을 언어 독립적으로 정의합니다. 실행 클래스, 억제 규칙, 임계값, 봉투 스키마, 입구 검증을 모두 포함합니다. Python 코드를 읽지 않고도 어떤 언어로든 구현할 수 있습니다.
+[SPEC.md](SPEC.md)는 Gatekeeper 표준을 언어 독립적으로 정의합니다. 실행 클래스, 억제 규칙, 임계값, 봉투 스키마, 입구 검증을 모두 포함합니다. Python 코드를 읽지 않고도 어떤 언어로든 구현할 수 있습니다.
 
 [ARCHITECTURE.md](ARCHITECTURE.md)는 18개 패키지로 구성된 제품 스위트, 표준 봉투 직렬화 규칙, 그리고 Python과 Go가 바이트 단위로 일치하는 서명을 만들도록 하면서 발견한 버그들을 문서화합니다. 새 구현을 작성하기 전에 반드시 읽으십시오.
 
@@ -152,21 +152,21 @@ gate.filter(mode=0.25).suppressed_names  # ['deploy']
 
 ## 구현체
 
-`maelstrom-gate`는 Python 참조 구현입니다. 명세는 언어 독립적이며, 다른 구현도 존재합니다.
+`gate-keeper`는 Python 참조 구현입니다. 명세는 언어 독립적이며, 다른 구현도 존재합니다.
 
 | 구현체            | 언어         | 저장소 | 상태 |
 |-------------------|--------------|------|------|
-| `maelstrom-gate`  | Python 3.10+ | 이 저장소 | **참조 구현** |
+| `gate-keeper`  | Python 3.10+ | 이 저장소 | **참조 구현** |
 | `gate-server-go`  | Go 1.22+     | `adam-scott-thomas/gate-server-go` | 준수 —— 언어 간 벡터 통과, Python이 만든 봉투를 Go에서 검증 가능 |
 
 언어 간 준수성은 공유 테스트 벡터(`gate-test/vectors/envelope_signing.json`)를 통해 강제됩니다. 새 구현은 해당 벡터를 통과하고 본 참조 구현이 만든 봉투를 검증할 수 있을 때에만 준수로 간주됩니다. 자세한 내용은 [ARCHITECTURE.md §6](ARCHITECTURE.md#6-conformance-requirements-for-new-implementations) 참조.
 
 ## 전체 스위트
 
-`maelstrom-gate`는 18개 패키지로 구성된 제품 스위트의 한 패키지입니다.
+`gate-keeper`는 18개 패키지로 구성된 제품 스위트의 한 패키지입니다.
 
 ```
-Layer 0 — Spec                maelstrom-gate, gate-server-go
+Layer 0 — Spec                gate-keeper, gate-server-go
 Layer 1 — Dev interfaces      gate-sdk, gate-cli
 Layer 2 — Domain              gate-policy, gate-schema
 Layer 3 — Governance          gate-guard, gate-webhook, gate-compliance, gate-metrics

@@ -1,4 +1,4 @@
-# maelstrom-gate
+# gate-keeper
 
 [English](README.md) · **中文** · [日本語](README.ja.md) · [한국어](README.ko.md) · [Русский](README.ru.md) · [Deutsch](README.de.md)
 
@@ -11,7 +11,7 @@
 ## 解决方案
 
 ```python
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 gate = Gate()
 gate.add_tools([
@@ -52,7 +52,7 @@ Your signals --> mode (0.0-1.0) --> Gate.filter() --> visible tools --> LLM prom
 ## 安装
 
 ```bash
-pip install maelstrom-gate
+pip install gate-keeper
 ```
 
 Python 3.10+。零依赖。
@@ -60,7 +60,7 @@ Python 3.10+。零依赖。
 ## 快速开始
 
 ```python
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 # Define your tools
 gate = Gate()
@@ -98,7 +98,7 @@ catalog = result.to_catalog()
 经过签名的权限集合，用于约束工具执行。信封随工具调用一起传递，告诉执行方它被允许做什么。
 
 ```python
-from maelstrom_gate import build_envelope, verify_envelope, Tool
+from gatekeeper import build_envelope, verify_envelope, Tool
 
 tool = Tool("read_file", execution_class="read_only")
 envelope = build_envelope(tool, mode=0.5, context_id="session_1", signing_key="your-key")
@@ -118,7 +118,7 @@ verify_envelope(envelope, "wrong-key")  # False
 在执行之前，对来自模型的工具请求进行校验。永远不要信任模型的工具选择 —— 用 Gate 去验证它。
 
 ```python
-from maelstrom_gate import validate_proposal
+from gatekeeper import validate_proposal
 
 result = validate_proposal("deploy", gate, mode=0.5)
 result.accepted  # False
@@ -138,7 +138,7 @@ gate.filter(mode=0.25).suppressed_names  # ['deploy']
 
 ## 规范
 
-[SPEC.md](SPEC.md) 以语言无关的方式定义了 Maelstrom Gate 标准。它涵盖执行类别、抑制规则、阈值、信封模式以及入口校验。无需阅读 Python 代码，你就可以在任意语言中实现它。
+[SPEC.md](SPEC.md) 以语言无关的方式定义了 Gatekeeper 标准。它涵盖执行类别、抑制规则、阈值、信封模式以及入口校验。无需阅读 Python 代码，你就可以在任意语言中实现它。
 
 [ARCHITECTURE.md](ARCHITECTURE.md) 记录了 18 个包组成的产品套件、权威的信封序列化规则，以及我们在让 Python 与 Go 产生字节一致签名时抓到的 bug。编写新实现前请先阅读。
 
@@ -152,21 +152,21 @@ gate.filter(mode=0.25).suppressed_names  # ['deploy']
 
 ## 实现
 
-`maelstrom-gate` 是 Python 参考实现。本规范是语言无关的，已有其他实现：
+`gate-keeper` 是 Python 参考实现。本规范是语言无关的，已有其他实现：
 
 | 实现              | 语言         | 仓库 | 状态 |
 |-------------------|--------------|------|------|
-| `maelstrom-gate`  | Python 3.10+ | 本仓库 | **参考实现** |
+| `gate-keeper`  | Python 3.10+ | 本仓库 | **参考实现** |
 | `gate-server-go`  | Go 1.22+     | `adam-scott-thomas/gate-server-go` | 合规 —— 通过跨语言向量；Python 构建的信封可在 Go 中校验 |
 
 跨语言一致性通过共享测试向量（`gate-test/vectors/envelope_signing.json`）强制保障。任何新实现当且仅当通过这些向量并能校验由本参考实现构建的信封时，才算合规。详见 [ARCHITECTURE.md §6](ARCHITECTURE.md#6-conformance-requirements-for-new-implementations)。
 
 ## 整个套件
 
-`maelstrom-gate` 是 18 个包组成的产品套件中的一员：
+`gate-keeper` 是 18 个包组成的产品套件中的一员：
 
 ```
-Layer 0 — Spec                maelstrom-gate, gate-server-go
+Layer 0 — Spec                gate-keeper, gate-server-go
 Layer 1 — Dev interfaces      gate-sdk, gate-cli
 Layer 2 — Domain              gate-policy, gate-schema
 Layer 3 — Governance          gate-guard, gate-webhook, gate-compliance, gate-metrics

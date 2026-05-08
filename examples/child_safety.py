@@ -9,7 +9,7 @@
 # LLM's catalog. The model cannot be prompt-injected into using a
 # tool that doesn't exist in its world.
 
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 # --- Define messaging tools with safety classifications ---
 

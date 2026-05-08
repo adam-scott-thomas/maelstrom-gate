@@ -1,6 +1,6 @@
 """Tests for maelstrom-gate."""
 import pytest
-from maelstrom_gate import (
+from gatekeeper import (
     Gate, Tool, ToolFilter, ExecutionClass,
     AuthorizationEnvelope, build_envelope, verify_envelope,
     validate_proposal, IngressResult,

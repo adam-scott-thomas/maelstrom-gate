@@ -1,4 +1,4 @@
-# maelstrom-gate
+# gate-keeper
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · **Русский** · [Deutsch](README.de.md)
 
@@ -11,7 +11,7 @@ Runtime governance для доступа AI-агентов к инструмен
 ## Решение
 
 ```python
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 gate = Gate()
 gate.add_tools([
@@ -52,7 +52,7 @@ Your signals --> mode (0.0-1.0) --> Gate.filter() --> visible tools --> LLM prom
 ## Установка
 
 ```bash
-pip install maelstrom-gate
+pip install gate-keeper
 ```
 
 Python 3.10+. Нулевые зависимости.
@@ -60,7 +60,7 @@ Python 3.10+. Нулевые зависимости.
 ## Быстрый старт
 
 ```python
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 # Define your tools
 gate = Gate()
@@ -98,7 +98,7 @@ catalog = result.to_catalog()
 Подписанные наборы разрешений, ограничивающие выполнение инструмента. Конверт путешествует вместе с вызовом и сообщает исполнителю, что ему разрешено делать.
 
 ```python
-from maelstrom_gate import build_envelope, verify_envelope, Tool
+from gatekeeper import build_envelope, verify_envelope, Tool
 
 tool = Tool("read_file", execution_class="read_only")
 envelope = build_envelope(tool, mode=0.5, context_id="session_1", signing_key="your-key")
@@ -118,7 +118,7 @@ verify_envelope(envelope, "wrong-key")  # False
 Проверяйте запросы модели на выполнение инструментов до их запуска. Никогда не доверяйте выбору модели — сверьте его с gate.
 
 ```python
-from maelstrom_gate import validate_proposal
+from gatekeeper import validate_proposal
 
 result = validate_proposal("deploy", gate, mode=0.5)
 result.accepted  # False
@@ -138,7 +138,7 @@ gate.filter(mode=0.25).suppressed_names  # ['deploy']
 
 ## Спецификация
 
-[SPEC.md](SPEC.md) определяет стандарт Maelstrom Gate в языконезависимой форме. Он охватывает классы выполнения, правила подавления, пороги, схемы конвертов и валидацию на входе. Его можно реализовать на любом языке, не заглядывая в Python.
+[SPEC.md](SPEC.md) определяет стандарт Gatekeeper в языконезависимой форме. Он охватывает классы выполнения, правила подавления, пороги, схемы конвертов и валидацию на входе. Его можно реализовать на любом языке, не заглядывая в Python.
 
 [ARCHITECTURE.md](ARCHITECTURE.md) описывает пакетный набор из 18 компонентов, канонические правила сериализации конвертов и баги, которые мы поймали, добиваясь побайтно идентичных подписей от Python и Go. Прочитайте этот документ, прежде чем писать новую реализацию.
 
@@ -152,21 +152,21 @@ gate.filter(mode=0.25).suppressed_names  # ['deploy']
 
 ## Реализации
 
-`maelstrom-gate` — это эталонная реализация на Python. Спецификация языконезависима, и другие реализации уже существуют:
+`gate-keeper` — это эталонная реализация на Python. Спецификация языконезависима, и другие реализации уже существуют:
 
 | Реализация        | Язык         | Репозиторий | Статус |
 |-------------------|--------------|------|------|
-| `maelstrom-gate`  | Python 3.10+ | этот репозиторий | **эталонная** |
+| `gate-keeper`  | Python 3.10+ | этот репозиторий | **эталонная** |
 | `gate-server-go`  | Go 1.22+     | `adam-scott-thomas/gate-server-go` | соответствует — проходит межъязыковые векторы; конверты, созданные на Python, проверяются в Go |
 
 Межъязыковое соответствие обеспечивается общими тестовыми векторами (`gate-test/vectors/envelope_signing.json`). Любая новая реализация считается соответствующей тогда и только тогда, когда она проходит эти векторы и способна проверить конверт, созданный этой эталонной реализацией. См. [ARCHITECTURE.md §6](ARCHITECTURE.md#6-conformance-requirements-for-new-implementations).
 
 ## Полный набор (The Suite)
 
-`maelstrom-gate` — один из 18 пакетов продуктового набора:
+`gate-keeper` — один из 18 пакетов продуктового набора:
 
 ```
-Layer 0 — Spec                maelstrom-gate, gate-server-go
+Layer 0 — Spec                gate-keeper, gate-server-go
 Layer 1 — Dev interfaces      gate-sdk, gate-cli
 Layer 2 — Domain              gate-policy, gate-schema
 Layer 3 — Governance          gate-guard, gate-webhook, gate-compliance, gate-metrics

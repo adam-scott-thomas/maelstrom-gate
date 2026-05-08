@@ -3,7 +3,7 @@
 # Filter OpenAI function-calling tools before sending to chat completions.
 # The model never sees suppressed tools -- it cannot request what it cannot see.
 
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 # --- Your tool definitions (map from OpenAI function schema) ---
 

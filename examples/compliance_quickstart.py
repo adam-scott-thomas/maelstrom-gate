@@ -6,7 +6,7 @@ Requires: pip install maelstrom-gate gate-compliance
 
 STUB -- provided by Creator 1 (gate-compliance) as a quickstart for gate-core users.
 """
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 from gate_compliance.store import AuditStore
 from gate_compliance.collector import ComplianceCollector
 from gate_compliance.report import ComplianceReporter

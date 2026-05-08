@@ -1,4 +1,4 @@
-# Maelstrom Gate Specification v0.1.0
+# Gatekeeper Specification v0.1.0
 
 A runtime governance standard for AI tool access. Implementations dynamically
 filter which tools an AI agent can see and invoke based on an operational

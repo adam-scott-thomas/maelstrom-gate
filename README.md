@@ -1,4 +1,4 @@
-# maelstrom-gate
+# gate-keeper
 
 **English** · [中文](README.zh-CN.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Русский](README.ru.md) · [Deutsch](README.de.md)
 
@@ -11,7 +11,7 @@ Your AI agent has access to every tool at all times. During an incident, it can 
 ## The Solution
 
 ```python
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 gate = Gate()
 gate.add_tools([
@@ -52,7 +52,7 @@ Unrecognized classes are treated as `high_impact`.
 ## Install
 
 ```bash
-pip install maelstrom-gate
+pip install gate-keeper
 ```
 
 Python 3.10+. Zero dependencies.
@@ -60,7 +60,7 @@ Python 3.10+. Zero dependencies.
 ## Quick Start
 
 ```python
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 # Define your tools
 gate = Gate()
@@ -98,7 +98,7 @@ Working examples for common agent frameworks:
 Signed permission sets that constrain tool execution. The envelope travels with the tool call and tells the executor what it is allowed to do.
 
 ```python
-from maelstrom_gate import build_envelope, verify_envelope, Tool
+from gatekeeper import build_envelope, verify_envelope, Tool
 
 tool = Tool("read_file", execution_class="read_only")
 envelope = build_envelope(tool, mode=0.5, context_id="session_1", signing_key="your-key")
@@ -118,7 +118,7 @@ Envelope parameters tighten automatically as mode increases. See [SPEC.md](SPEC.
 Validate tool requests from the model before execution. Never trust the model's tool choice -- verify it against the gate.
 
 ```python
-from maelstrom_gate import validate_proposal
+from gatekeeper import validate_proposal
 
 result = validate_proposal("deploy", gate, mode=0.5)
 result.accepted  # False
@@ -138,7 +138,7 @@ gate.filter(mode=0.25).suppressed_names  # ['deploy']
 
 ## The Spec
 
-[SPEC.md](SPEC.md) defines the Maelstrom Gate standard in language-agnostic terms. It covers execution classes, suppression rules, thresholds, envelope schemas, and ingress validation. You can implement it in any language without reading the Python.
+[SPEC.md](SPEC.md) defines the Gatekeeper standard in language-agnostic terms. It covers execution classes, suppression rules, thresholds, envelope schemas, and ingress validation. You can implement it in any language without reading the Python.
 
 [ARCHITECTURE.md](ARCHITECTURE.md) documents the 18-package product suite, the canonical envelope serialization rules, and the bugs we caught while making Python and Go agree on byte-identical signatures. Read it before writing a new implementation.
 
@@ -152,21 +152,21 @@ Formal JSON Schema definitions for interoperability:
 
 ## Implementations
 
-`maelstrom-gate` is the Python reference implementation. The spec is language-agnostic and other implementations exist:
+`gate-keeper` is the Python reference implementation. The spec is language-agnostic and other implementations exist:
 
 | Implementation | Language | Repo | Status |
 |----------------|----------|------|--------|
-| `maelstrom-gate` | Python 3.10+ | this repo | **reference** |
+| `gate-keeper` | Python 3.10+ | this repo | **reference** |
 | `gate-server-go` | Go 1.22+ | `adam-scott-thomas/gate-server-go` | conformant — passes cross-language vectors; Python-built envelopes verify in Go |
 
 Cross-language conformance is enforced via shared test vectors (`gate-test/vectors/envelope_signing.json`). Any new implementation is compliant iff it passes those vectors and can verify an envelope built by this reference. See [ARCHITECTURE.md §6](ARCHITECTURE.md#6-conformance-requirements-for-new-implementations).
 
 ## The Suite
 
-`maelstrom-gate` is one package in an 18-package product suite:
+`gate-keeper` is one package in an 18-package product suite:
 
 ```
-Layer 0 — Spec                maelstrom-gate, gate-server-go
+Layer 0 — Spec                gate-keeper, gate-server-go
 Layer 1 — Dev interfaces      gate-sdk, gate-cli
 Layer 2 — Domain              gate-policy, gate-schema
 Layer 3 — Governance          gate-guard, gate-webhook, gate-compliance, gate-metrics

@@ -3,7 +3,7 @@
 # Wrap LangChain tools with gate filtering. The agent only receives tools
 # that survive the current mode level.
 
-from maelstrom_gate import Gate, Tool
+from gatekeeper import Gate, Tool
 
 # --- Simulate LangChain tool objects ---
 # In real code these would be @tool-decorated functions or BaseTool subclasses.

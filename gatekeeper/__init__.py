@@ -1,9 +1,9 @@
-"""Maelstrom Gate -- runtime governance for AI tool access.
+"""Gatekeeper -- runtime governance for AI tool access.
 
-Implements the Maelstrom Gate standard (see SPEC.md) for dynamically filtering
+Implements the Gatekeeper standard (see SPEC.md) for dynamically filtering
 which tools an AI agent can see and invoke based on a threat/mode signal.
 
-    from maelstrom_gate import Gate, Tool
+    from gatekeeper import Gate, Tool
 
     gate = Gate()
     gate.add_tool(Tool("send_email", execution_class="external_action"))
@@ -17,9 +17,9 @@ Specification: SPEC.md
 JSON Schemas: schema/tool.schema.json, schema/envelope.schema.json
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
-from maelstrom_gate.core import (
+from gatekeeper.core import (
     Gate,
     Tool,
     ToolFilter,
@@ -29,8 +29,8 @@ from maelstrom_gate.core import (
     T_UP,
     zone,
 )
-from maelstrom_gate.envelope import AuthorizationEnvelope, build_envelope, verify_envelope, verify_envelope_fresh
-from maelstrom_gate.ingress import validate_proposal, IngressResult
+from gatekeeper.envelope import AuthorizationEnvelope, build_envelope, verify_envelope, verify_envelope_fresh
+from gatekeeper.ingress import validate_proposal, IngressResult
 
 __all__ = [
     "Gate",

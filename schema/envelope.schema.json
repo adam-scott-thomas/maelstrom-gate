@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/adam-scott-thomas/maelstrom-gate/schema/envelope.schema.json",
+  "$id": "https://github.com/adam-scott-thomas/gate-keeper/schema/envelope.schema.json",
   "title": "Maelstrom Gate Authorization Envelope",
   "description": "A signed, frozen permission set that constrains tool execution. See SPEC.md Section 8.",
   "type": "object",

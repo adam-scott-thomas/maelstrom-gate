@@ -3,16 +3,16 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "maelstrom-gate"
-version = "0.1.0"
-description = "Runtime governance gate for AI tool access — dynamically filter tool manifests based on threat level"
+name = "gate-keeper"
+version = "1.0.0"
+description = "Gatekeeper — runtime governance gate for AI tool access. Dynamically filter tool manifests based on threat level."
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.10"
 authors = [{name = "Adam Scott Thomas"}]
-keywords = ["ai", "governance", "agent", "tools", "safety", "runtime"]
+keywords = ["ai", "governance", "agent", "tools", "safety", "runtime", "gatekeeper"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
@@ -21,11 +21,11 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/adam-scott-thomas/maelstrom-gate"
-Repository = "https://github.com/adam-scott-thomas/maelstrom-gate"
+Homepage = "https://github.com/adam-scott-thomas/gate-keeper"
+Repository = "https://github.com/adam-scott-thomas/gate-keeper"
 
 [tool.setuptools.packages.find]
-include = ["maelstrom_gate*"]
+include = ["gatekeeper*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

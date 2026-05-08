@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/adam-scott-thomas/maelstrom-gate/schema/tool.schema.json",
+  "$id": "https://github.com/adam-scott-thomas/gate-keeper/schema/tool.schema.json",
   "title": "Maelstrom Gate Tool Manifest",
   "description": "Describes a tool registered with the Maelstrom Gate. See SPEC.md Section 6.",
   "type": "object",

@@ -13,7 +13,7 @@ import json
 import pytest
 from dataclasses import asdict
 
-from maelstrom_gate import (
+from gatekeeper import (
     Gate, Tool, ToolFilter,
     AuthorizationEnvelope, build_envelope, verify_envelope,
     validate_proposal,
@@ -216,7 +216,7 @@ def test_created_at_survives_roundtrip():
 
 def test_verify_fresh_valid():
     """A freshly built envelope should pass freshness check."""
-    from maelstrom_gate.envelope import verify_envelope_fresh
+    from gatekeeper.envelope import verify_envelope_fresh
     e = build_envelope(Tool("r", execution_class="read_only"), 0.1, "ctx", KEY)
     valid, reason = verify_envelope_fresh(e, KEY, max_age_seconds=60)
     assert valid is True
@@ -226,7 +226,7 @@ def test_verify_fresh_valid():
 def test_verify_fresh_expired():
     """An old envelope should fail freshness check."""
     import time
-    from maelstrom_gate.envelope import verify_envelope_fresh
+    from gatekeeper.envelope import verify_envelope_fresh
     e = build_envelope(Tool("r", execution_class="read_only"), 0.1, "ctx", KEY)
     # Manually create an expired envelope by reconstructing with old timestamp
     old_time = time.time_ns() // 1000 - 600 * 10**6  # 10 minutes ago, in microseconds
@@ -238,7 +238,7 @@ def test_verify_fresh_expired():
         "human_approved": e.human_approved, "created_at": old_time,
     }
     import hashlib, hmac as _hmac
-    from maelstrom_gate.envelope import _canonical_hash
+    from gatekeeper.envelope import _canonical_hash
     sig = _hmac.new(KEY.encode(), _canonical_hash(old_data), hashlib.sha256).hexdigest()
     old_env = AuthorizationEnvelope(
         envelope_id=e.envelope_id, context_id=e.context_id,
@@ -257,7 +257,7 @@ def test_verify_fresh_expired():
 
 def test_verify_fresh_no_timestamp():
     """Envelope with created_at=0 should fail freshness check."""
-    from maelstrom_gate.envelope import verify_envelope_fresh
+    from gatekeeper.envelope import verify_envelope_fresh
     # Legacy envelope without timestamp — manually construct
     legacy = AuthorizationEnvelope(
         envelope_id="e1", context_id="c1", tool_name="r",
