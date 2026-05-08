@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "gate-keeper"
+name = "gatekeeper-one"
 version = "1.0.0"
 description = "Gatekeeper — runtime governance gate for AI tool access. Dynamically filter tool manifests based on threat level."
 readme = "README.md"
